@@ -1,0 +1,19 @@
+--- a/debian/rules
++++ b/debian/rules
+@@ -15,7 +15,8 @@ DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+ export DEB_BUILD_OPTIONS=nocheck
+ 
+ # --enable-debug --with-drivers=all
+-confflags := --disable-silent-rules \
++confflags := --with-drivers=acr122_usb,acr122s,arygon,pn53x_usb,pn532_uart,pn71xx \
++	--disable-silent-rules \
+ 	--prefix=/usr \
+ 	--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
+ 	$(NULL)
+@@ -38,3 +39,6 @@ override_dh_auto_install:
+ override_dh_strip:
+ 	dh_strip -plibnfc5 --dbg-package=libnfc5-dbg
+ 	dh_strip --remaining-packages
++
++override_dh_shlibdeps:
++	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info

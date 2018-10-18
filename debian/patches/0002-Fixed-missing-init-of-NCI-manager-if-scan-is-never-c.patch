@@ -1,0 +1,31 @@
+From da67c8edf7ef681409a00fef1a124569706c743f Mon Sep 17 00:00:00 2001
+From: Steffen Klee <sklee@seemoo.tu-darmstadt.de>
+Date: Thu, 18 Oct 2018 18:08:20 +0200
+Subject: [PATCH 2/3] Fixed missing init of NCI manager if "scan" is never
+ called
+
+---
+ libnfc/drivers/pn71xx.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/libnfc/drivers/pn71xx.c b/libnfc/drivers/pn71xx.c
+index 8245908..5db2e87 100644
+--- a/libnfc/drivers/pn71xx.c
++++ b/libnfc/drivers/pn71xx.c
+@@ -109,6 +109,13 @@ pn71xx_open(const nfc_context *context, const nfc_connstring connstring)
+ 	strcpy(pnd->name, "pn71xx-device");
+ 	strcpy(pnd->connstring, connstring);
+ 
++	if (!nfcManager_isNfcActive()) {
++        if (nfcManager_doInitialize() != 0) {
++            log_put(LOG_GROUP, LOG_CATEGORY, NFC_LOG_PRIORITY_ERROR, "cannot initialize nfcManager");
++            return NULL;
++        }
++    }
++
+ 	TagCB.onTagArrival = onTagArrival;
+ 	TagCB.onTagDeparture = onTagDeparture;
+ 	nfcManager_registerTagCallback(&TagCB);
+-- 
+2.19.1
+

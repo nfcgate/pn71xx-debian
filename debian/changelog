@@ -1,0 +1,9 @@
+libnfc (1.7.1-5) UNRELEASED; urgency=medium
+
+  * Add upstream pull request for libnfc-nci compatibility
+    (upstream pull request number: #469)
+  * Add patch for missing NCI manager initialization
+  * Add patch for PN71XX CMake build support
+
+ --  Steffen Klee <sklee@seemoo.tu-darmstadt.de>  Thu, 18 Oct 2018 22:44:15 +0000
+

@@ -1,0 +1,67 @@
+From d4ab97653c1b1dfff777375b64f819ac1607b726 Mon Sep 17 00:00:00 2001
+From: Steffen Klee <sklee@seemoo.tu-darmstadt.de>
+Date: Wed, 3 Oct 2018 21:16:31 +0200
+Subject: [PATCH 3/3] Added CMake build definitions for PN71XX
+
+---
+ cmake/modules/LibnfcDrivers.cmake |  7 +++++++
+ libnfc/CMakeLists.txt             | 13 +++++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/cmake/modules/LibnfcDrivers.cmake b/cmake/modules/LibnfcDrivers.cmake
+index 7a2a11d..b4ab933 100644
+--- a/cmake/modules/LibnfcDrivers.cmake
++++ b/cmake/modules/LibnfcDrivers.cmake
+@@ -11,6 +11,7 @@ ELSE(WIN32)
+ ENDIF(WIN32)
+ SET(LIBNFC_DRIVER_PN532_UART ON CACHE BOOL "Enable PN532 UART support (Use serial port)")
+ SET(LIBNFC_DRIVER_PN53X_USB ON CACHE BOOL "Enable PN531 and PN531 USB support (Depends on libusb)")
++SET(LIBNFC_DRIVER_PN71XX ON CACHE BOOL "Enable PN71XX support (Depends on libnfc-nci)")
+ 
+ IF(LIBNFC_DRIVER_ACR122_PCSC)
+   FIND_PACKAGE(PCSC REQUIRED)
+@@ -61,4 +62,10 @@ IF(LIBNFC_DRIVER_PN53X_USB)
+   SET(USB_REQUIRED TRUE)
+ ENDIF(LIBNFC_DRIVER_PN53X_USB)
+ 
++IF(LIBNFC_DRIVER_PN71XX)
++  ADD_DEFINITIONS("-DDRIVER_PN71XX_ENABLED")
++  SET(DRIVERS_SOURCES ${DRIVERS_SOURCES} "drivers/pn71xx")
++  SET(NCI_REQUIRED TRUE)
++ENDIF(LIBNFC_DRIVER_PN71XX)
++
+ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/drivers)
+diff --git a/libnfc/CMakeLists.txt b/libnfc/CMakeLists.txt
+index 66d2124..a91adfe 100644
+--- a/libnfc/CMakeLists.txt
++++ b/libnfc/CMakeLists.txt
+@@ -45,6 +45,15 @@ IF(SPI_REQUIRED)
+   ENDIF(WIN32)
+ ENDIF(SPI_REQUIRED)
+ 
++IF(NCI_REQUIRED)
++  IF(WIN32)
++    # Windows is not supported at the moment
++    MESSAGE( FATAL_ERROR "NCI not (yet) supported under Windows!" )
++  ELSE(WIN32)
++    FIND_LIBRARY(NCI_LIB nfc_nci_linux)
++  ENDIF(WIN32)
++ENDIF(NCI_REQUIRED)
++
+ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/buses)
+ 
+ IF(WIN32)
+@@ -89,6 +98,10 @@ IF(LIBUSB_FOUND)
+   TARGET_LINK_LIBRARIES(nfc ${LIBUSB_LIBRARIES})
+ ENDIF(LIBUSB_FOUND)
+ 
++IF(NCI_LIB)
++  TARGET_LINK_LIBRARIES(nfc ${NCI_LIB})
++ENDIF(NCI_LIB)
++
+ SET_TARGET_PROPERTIES(nfc PROPERTIES SOVERSION 0)
+ 
+ IF(WIN32)
+-- 
+2.19.1
+
